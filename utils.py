@@ -42,7 +42,7 @@ def generate_sample(ar, ma, n_samples, scale=1.0, axis=0):
 
 # Function to simulate a single multiple baseline design
 # with different numbers of patients and points per patients
-def SimulateOneDatasetMB(n_patients, n_points, m0 = 10.0, sd=1.0, d=0.0, a=0.0, min_baseline=5, min_phase=5):
+def SimulateOneMultipleBaseline(n_patients, n_points, m0 = 10.0, sd=1.0, d=0.0, a=0.0, min_baseline=5, min_phase=5):
     assert min_baseline >= 5
     assert min_phase >= 5
     assert (min_baseline >+ min_phase) <= n_points
@@ -55,7 +55,7 @@ def SimulateOneDatasetMB(n_patients, n_points, m0 = 10.0, sd=1.0, d=0.0, a=0.0, 
     return values, phases
 
 # Simulating multiple series with alternating effects
-def SimulateDatasetsMB(n_repeats, n_patients, n_points, m0=10.0, sd=1.0, effect_size=None, ar=None, min_baseline=5, min_phase=5):
+def SimulateMultipleBaselineDatasets(n_repeats, n_patients, n_points, m0=10.0, sd=1.0, effect_size=None, ar=None, min_baseline=5, min_phase=5):
     if ar is None:
         ar = np.random.normal(0.2, 0.15, n_repeats)
         ar[ar > 0.8] = 0.8
@@ -74,11 +74,11 @@ def SimulateDatasetsMB(n_repeats, n_patients, n_points, m0=10.0, sd=1.0, effect_
     
     df_res = None
     for i in range(n_repeats):
-        xy_0 = SimulateOneDatasetMB(n_patients, n_points, m0=m0, sd=sd, a=ar[i], min_baseline=min_baseline, min_phase=min_phase)
-        xy_1 = SimulateOneDatasetMB(n_patients, n_points, m0=m0, sd=sd, d=effect_size[i], a=ar[i], min_baseline=min_baseline, min_phase=min_phase)
+        xy_0 = SimulateOneMultipleBaseline(n_patients, n_points, m0=m0, sd=sd, a=ar[i], min_baseline=min_baseline, min_phase=min_phase)
+        xy_1 = SimulateOneMultipleBaseline(n_patients, n_points, m0=m0, sd=sd, d=effect_size[i], a=ar[i], min_baseline=min_baseline, min_phase=min_phase)
         
         df = pd.concat([pd.DataFrame(np.hstack(xy_0)), pd.DataFrame(np.hstack(xy_1))], axis=0)
-        df.columns = [f"x_{i}" for i in range(1, 1 + df.shape[1] // 2)] + [f"phase_{i}" for i in range(1, 1 + df.shape[1] // 2)]
+        df.columns = [f"x{i}" for i in range(1, 1 + df.shape[1] // 2)] + [f"phase{i}" for i in range(1, 1 + df.shape[1] // 2)]
         df["simul_id"] = int(i + 1)
         df_res = pd.concat([df_res, df], axis=0)
     
